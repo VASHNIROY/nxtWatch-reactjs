@@ -31,10 +31,17 @@ class Sidebar extends Component {
                     src="https://assets.ccbp.in/frontend/react-js/nxt-watch-facebook-logo-img.png"
                     alt="facebook logo"
                   />
-                  <LogoIcons
-                    src="https://assets.ccbp.in/frontend/react-js/nxt-watch-linked-in-logo-img.png"
-                    alt="linked in logo"
-                  />
+                  <a
+                    target="_blank"
+                    href="https://www.linkedin.com/in/vashniroy/"
+                    rel="noreferrer"
+                  >
+                    {' '}
+                    <LogoIcons
+                      src="https://assets.ccbp.in/frontend/react-js/nxt-watch-linked-in-logo-img.png"
+                      alt="linked in logo"
+                    />
+                  </a>
                 </div>
                 <Text theme={theme}>
                   Enjoy! Now to see your channels and recommendations!
