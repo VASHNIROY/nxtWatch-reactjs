@@ -1,106 +1,145 @@
-import styled from 'styled-components'
+import {Component} from 'react'
+import {Redirect} from 'react-router-dom'
+import Cookies from 'js-cookie'
 
-export const NavMobileContainer = styled.nav`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px;
-  background-color: ${props =>
-    props.theme === 'dark' ? '#212121' : '#f4f4f4'};
-  @media screen and (min-width: 768px) {
-    display: none;
+import ThemeContext from '../../Context/ThemeContext'
+import {
+  LoginContainer,
+  LoginCardContainer,
+  WebsiteLogo,
+  Label,
+  LoginInput,
+  Form,
+  ShowPasswordLabel,
+  LoginButton,
+  ErrorMsg,
+} from './styledComponents'
+
+class Login extends Component {
+  state = {
+    username: '',
+    password: '',
+    passwordType: 'password',
+    errorMsg: '',
+    isError: false,
   }
-`
 
-export const NavLargeContainer = styled(NavMobileContainer)`
-  display: none;
-  @media screen and (min-width: 768px) {
-    display: flex;
+  onSubmitSuccess = jwtToken => {
+    const {history} = this.props
+    Cookies.set('jwt_token', jwtToken, {expires: 30})
+    history.replace('/')
+    this.setState({isError: false})
   }
-`
 
-export const HeaderLogoImg = styled.img`
-  width: 150px;
-  @media screen and (min-width: 768px) {
-    width: 20 0px;
+  onSubmitFailure = errorMsg => {
+    this.setState({errorMsg, isError: true})
   }
-`
-export const NavMobileIcons = styled.div``
 
-export const IconButton = styled.button`
-  background-color: transparent;
-  border: none;
-  margin-left: 5px;
-  margin-right: 5px;
-`
+  onSubmit = async event => {
+    event.preventDefault()
 
-export const CloseButton = styled.div`
-  align-self: flex-end;
-  margin-top: 10px;
-  margin-right: 10px;
-`
-export const LogoutPopupContent = styled.div`
-  background-color: ${props =>
-    props.theme === 'dark' ? '#0f0f0f' : '#f9f9f9'};
-  border-radius: 8px;
-  width: 100%;
-  height: 100%;
-  margin: auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  color: ${props => (props.theme === 'dark' ? '#f9f9f9' : '#0f0f0f')};
-  @media screen and (min-width: 768px) {
-    width: 50%;
+    let {username, password} = this.state
+
+    if (username.toLowerCase().trim(' ') === 'vashniroy') username = 'rahul'
+    if (password.toLowerCase().trim(' ') === 'vashniroy@2024')
+      password = 'rahul@2021'
+
+    const apiUrl = 'https://apis.ccbp.in/login'
+    const userDetails = {username, password}
+
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(userDetails),
+    }
+
+    const response = await fetch(apiUrl, options)
+    const data = await response.json()
+    if (response.ok === true) {
+      this.onSubmitSuccess(data.jwt_token)
+    } else {
+      this.onSubmitFailure(data.error_msg)
+    }
   }
-`
 
-export const Button = styled.button`
-  background-color: ${props => (props.outline ? 'transparent' : '#3b82f6')};
-  width: 80px;
-  height: 35px;
-  margin: 5px;
-  color: ${props => (props.outline ? '#3b82f6' : 'white')};
-  border-radius: 5px;
-  outline: none;
-  border: 1px solid #3b82f6;
-`
-export const ProfileIcon = styled.img`
-  width: 25px;
-  margin-left: 15px;
-  margin-right: 15px;
-`
-export const NavLargeIcons = styled.div`
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-`
-export const LargeLogoutButton = styled(Button)`
-  margin: 0px;
-  margin-left: 15px;
-  margin-right: 15px;
-  height: 25px;
-  color: ${props => (props.theme === 'dark' ? '#f9f9f9' : '#3b82f6')};
-  border-color: ${props => (props.theme === 'dark' ? '#f9f9f9' : '#3b82f6')};
-`
-export const MenuPopupMobile = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  align-items: center;
-  background-color: black;
-  width: 100%;
-  height: 100vh;
-  padding-top: 20px;
-  background-color: ${props =>
-    props.theme === 'dark' ? '#0f0f0f' : '#f9f9f9'};
-`
-export const MenuListMobile = styled.div`
-  width: 100%;
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`
+  onCheckBox = event => {
+    this.setState({passwordType: event.target.checked ? 'text' : 'password'})
+  }
+
+  updateUsername = event => {
+    this.setState({username: event.target.value})
+  }
+
+  updatePassword = event => {
+    this.setState({password: event.target.value})
+  }
+
+  render() {
+    const {passwordType, username, password, isError, errorMsg} = this.state
+
+    const jwtToken = Cookies.get('jwt_token')
+
+    if (jwtToken !== undefined) {
+      return <Redirect to="/" />
+    }
+
+    return (
+      <ThemeContext.Consumer>
+        {value => {
+          const {isDarkTheme} = value
+
+          const websiteLogo = isDarkTheme
+            ? 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-dark-theme-img.png'
+            : 'https://assets.ccbp.in/frontend/react-js/nxt-watch-logo-light-theme-img.png'
+
+          const theme = isDarkTheme ? 'dark' : 'light'
+
+          return (
+            <LoginContainer theme={theme}>
+              <LoginCardContainer theme={theme}>
+                <WebsiteLogo src={websiteLogo} alt="website logo" />
+                <Form onSubmit={this.onSubmit}>
+                  <Label htmlFor="username" theme={theme}>
+                    USERNAME
+                  </Label>
+                  <LoginInput
+                    type="text"
+                    id="username"
+                    placeholder="vashniroy"
+                    theme={theme}
+                    value={username}
+                    onChange={this.updateUsername}
+                  />
+                  <Label htmlFor="password" theme={theme}>
+                    PASSWORD
+                  </Label>
+                  <LoginInput
+                    type={passwordType}
+                    id="password"
+                    placeholder="vashniroy@2024"
+                    theme={theme}
+                    value={password}
+                    onChange={this.updatePassword}
+                  />
+                  <input
+                    type="checkbox"
+                    id="showPassword"
+                    onClick={this.onCheckBox}
+                  />
+                  <ShowPasswordLabel theme={theme} htmlFor="showPassword">
+                    Show Password
+                  </ShowPasswordLabel>
+                  <div>
+                    <LoginButton type="sumbit">Login</LoginButton>
+                  </div>
+                  <ErrorMsg>{isError && `* ${errorMsg}`}</ErrorMsg>
+                </Form>
+              </LoginCardContainer>
+            </LoginContainer>
+          )
+        }}
+      </ThemeContext.Consumer>
+    )
+  }
+}
+
+export default Login
